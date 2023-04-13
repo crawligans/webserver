@@ -1,9 +1,9 @@
 package cis5550.webserver;
 
 import cis5550.tools.Logger;
+import cis5550.webserver.HTTPMessage.HTTPVersion;
 import cis5550.webserver.Request.Method;
 import cis5550.webserver.Response.Status;
-import cis5550.webserver.HTTPMessage.HTTPVersion;
 import cis5550.webserver.model.RouteTable;
 import cis5550.webserver.model.Session;
 import cis5550.webserver.model.StaticFileRequestHandler;
@@ -200,25 +200,28 @@ public class Server implements AutoCloseable {
         return secureSsock != null && !secureSsock.isClosed();
     }
 
-    private void start()
-        throws IOException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableKeyException, CertificateException, KeyManagementException {
+    private void start() throws IOException {
         if (_isRunning() || _isRunningSecure()) {
             throw new IllegalStateException("Server already started");
         }
         this.ssock = new ServerSocket(this.port);
+        logger.info("Server Started on port " + this.port + "(HTTP)");
 
-        String pwd = "secret";
-        KeyStore keyStore = KeyStore.getInstance("JKS");
-        keyStore.load(new FileInputStream("keystore.jks"), pwd.toCharArray());
-        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
-        keyManagerFactory.init(keyStore, pwd.toCharArray());
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
-        ServerSocketFactory factory = sslContext.getServerSocketFactory();
-        this.secureSsock = factory.createServerSocket(this.securePort);
+        try {
+            String pwd = "secret";
+            KeyStore keyStore = KeyStore.getInstance("JKS");
+            keyStore.load(new FileInputStream("keystore.jks"), pwd.toCharArray());
+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+            keyManagerFactory.init(keyStore, pwd.toCharArray());
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
+            ServerSocketFactory factory = sslContext.getServerSocketFactory();
+            this.secureSsock = factory.createServerSocket(this.securePort);
+            logger.info("Server Started on port " + this.securePort + "(HTTPS)");
+        } catch (Exception e) {
+            logger.error("Could not start HTTPS server", e);
+        }
 
-        logger.info(
-            "Server Started on port " + this.port + "(HTTP), " + this.securePort + "(HTTPS)");
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 if (isRunning()) {
