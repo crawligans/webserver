@@ -219,7 +219,8 @@ public class Server implements AutoCloseable {
             this.secureSsock = factory.createServerSocket(this.securePort);
             logger.info("Server Started on port " + this.securePort + "(HTTPS)");
         } catch (Exception e) {
-            logger.error("Could not start HTTPS server", e);
+            // just so it does not clog up console
+            logger.warn("Could not start HTTPS server");
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -238,6 +239,11 @@ public class Server implements AutoCloseable {
     }
 
     private void listen(ServerSocket ssock, int maxRetry) {
+
+        // https socket could be null if it throws an exception
+        if (ssock == null)
+            return;
+
         logger.info("Listening on " + ssock.getInetAddress() + ":" + ssock.getLocalPort());
         int ex = 0;
         while (maxRetry < 0 || ex <= maxRetry) {
