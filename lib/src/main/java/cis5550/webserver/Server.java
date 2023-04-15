@@ -219,7 +219,8 @@ public class Server implements AutoCloseable {
             this.secureSsock = factory.createServerSocket(this.securePort);
             logger.info("Server Started on port " + this.securePort + "(HTTPS)");
         } catch (Exception e) {
-            logger.error("Could not start HTTPS server", e);
+            // just so it does not clog up console
+            logger.warn("Could not start HTTPS server");
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
