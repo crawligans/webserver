@@ -238,6 +238,11 @@ public class Server implements AutoCloseable {
     }
 
     private void listen(ServerSocket ssock, int maxRetry) {
+
+        // https socket could be null if it throws an exception
+        if (ssock == null)
+            return;
+
         logger.info("Listening on " + ssock.getInetAddress() + ":" + ssock.getLocalPort());
         int ex = 0;
         while (maxRetry < 0 || ex <= maxRetry) {
