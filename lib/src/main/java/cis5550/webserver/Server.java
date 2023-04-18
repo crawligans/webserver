@@ -347,7 +347,8 @@ public class Server implements AutoCloseable {
                     queryStrings.add(new String(body, StandardCharsets.UTF_8));
                 }
                 queryParams = queryStrings.stream().flatMap(qs -> Arrays.stream(qs.split("&")))
-                    .filter(Predicate.not(String::isBlank)).map(kv -> kv.split("=")).collect(
+                    .filter(Predicate.not(String::isBlank)).map(kv -> kv.split("=", 2))
+                    .filter(kv -> kv.length > 1).collect(
                         Collectors.toMap(kv -> URLDecoder.decode(kv[0], StandardCharsets.UTF_8),
                             kv -> URLDecoder.decode(kv[1], StandardCharsets.UTF_8)));
                 request = new RequestImpl(Method.valueOf(req[0].toUpperCase()), url[0], req[2],
