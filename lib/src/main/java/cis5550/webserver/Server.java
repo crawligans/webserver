@@ -39,6 +39,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.KeyManagerFactory;
@@ -346,11 +347,11 @@ public class Server implements AutoCloseable {
                     queryStrings.add(new String(body, StandardCharsets.UTF_8));
                 }
                 queryParams = queryStrings.stream().flatMap(qs -> Arrays.stream(qs.split("&")))
-                    .map(kv -> kv.split("=")).collect(
+                    .filter(Predicate.not(String::isBlank)).map(kv -> kv.split("=")).collect(
                         Collectors.toMap(kv -> URLDecoder.decode(kv[0], StandardCharsets.UTF_8),
                             kv -> URLDecoder.decode(kv[1], StandardCharsets.UTF_8)));
-                request = new RequestImpl(Method.valueOf(req[0].toUpperCase()), url[0], req[2], headers,
-                    queryParams, new HashMap<>(),
+                request = new RequestImpl(Method.valueOf(req[0].toUpperCase()), url[0], req[2],
+                    headers, queryParams, new HashMap<>(),
                     (InetSocketAddress) clientSocket.getRemoteSocketAddress(), body) {
                     @Override
                     public cis5550.webserver.Session session() {
