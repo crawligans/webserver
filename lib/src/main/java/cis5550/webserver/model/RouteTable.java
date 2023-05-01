@@ -70,9 +70,11 @@ public class RouteTable {
                     .map(e -> {
                         Map.Entry<List<String>, Route> ert = e.getValue()
                             .getRoute(path.subList(1, path.size()));
-                        ert.getKey().add(0, ":" + e.getKey());
+                        if (ert != null) {
+                            ert.getKey().add(0, ":" + e.getKey());
+                        }
                         return ert;
-                    })
+                    }).filter(Objects::nonNull)
                     .filter(e -> Objects.nonNull(e.getValue())).toList();
             return
                 paramRoutes.stream().mapToInt(e -> e.getKey().size()).max()
