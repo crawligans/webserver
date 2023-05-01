@@ -59,7 +59,7 @@ public class RouteTable {
     public Map.Entry<List<String>, Route> getRoute(List<String> path) {
         RouteTable tb;
         if (path == null || path.size() == 0) {
-            return Map.entry(new Vector<>(), rootRoute);
+            return rootRoute != null ? Map.entry(new Vector<>(), rootRoute) : null;
         } else if ((tb = staticRouteTable.get(path.get(0))) != null) {
             Map.Entry<List<String>, Route> e = tb.getRoute(path.subList(1, path.size()));
             e.getKey().add(0, path.get(0));
